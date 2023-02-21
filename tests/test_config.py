@@ -1,5 +1,6 @@
 import pytest
 from json import JSONDecodeError
+from contextlib import nullcontext as does_not_raise
 from config import Config, MissingConfigFileException
 
 @pytest.fixture
@@ -15,107 +16,179 @@ def invalid_test_file():
 def malformed_test_file():
     return './tests/malformed_test.json'
 
-def test_load(valid_config):
 
+## LOAD tests
+
+def test_load(valid_config):
     assert valid_config != {}
 
 def test_invalid_load(invalid_test_file):
     with pytest.raises(FileNotFoundError):
-        conf = Config(invalid_test_file)
+        Config(invalid_test_file)
 
 def test_malformed_load(malformed_test_file):
     with pytest.raises(JSONDecodeError):
-        conf = Config(malformed_test_file)
+        Config(malformed_test_file)
 
-def test_set(valid_config):
-    v = valid_config['test']
-    valid_config.set('test', value='test2')
 
-    assert v == 'test' and valid_config['test'] != 'test' and valid_config['test'] == 'test2'
 
-def test_set2(valid_config):
+
+## SET tests
+
+### FUNC tests
+
+@pytest.mark.parametrize('keys, orig_val, expected_val, expected_except', [
+    ('test', 'test', 'test2', does_not_raise()),
+    (('nestedTest', 'test'), 'test', 'test2', does_not_raise()),
+    ('get', 'test', 'test2', does_not_raise()),
+    ('badNestedTest', 'test', 'test2', pytest.raises(KeyError)),
+    (None, None, None, pytest.raises(KeyError)),
+    ((), None, None, pytest.raises(KeyError)),
+    ([], None, None, pytest.raises(KeyError))
+])
+
+def test_set_by_func(valid_config, keys, orig_val, expected_val, expected_except):
+    with expected_except:
+        v = valid_config.get(keys)
+        valid_config.set(keys, value=expected_val)
+
+        assert v == orig_val and valid_config.get(keys) != orig_val and valid_config.get(keys) == expected_val
+
+### KEY tests
+
+def test_key_set(valid_config):
     v = valid_config['test']
     valid_config['test'] = 'test2'
 
     assert v == 'test' and valid_config['test'] != 'test' and valid_config['test'] == 'test2'
 
-def test_nested_set(valid_config):
-    v = valid_config['nestedTest']['test']
-    valid_config.set('nestedTest', 'test', value='test2')
 
-    assert v == 'test' and valid_config['nestedTest']['test'] != 'test' and valid_config['nestedTest']['test'] == 'test2'
 
-def test_bad_nested_set(valid_config):
-    with pytest.raises(KeyError):
-        valid_config.set('badNestedTest', 'test', value='test2')
 
-def test_get(valid_config):
-    v = valid_config.get('test')
+## GET tests
 
-    assert v == 'test'
+### FUNC tests
 
-def test_empty_get(valid_config):
-    with pytest.raises(KeyError):
-        valid_config.get()
+@pytest.mark.parametrize('keys, expected_result, expected_except', [
+    ('test', 'test', does_not_raise()),
+    ('nestedTest', { 'test': 'test' }, does_not_raise()),
+    (('nestedTest', 'test'), 'test', does_not_raise()),
+    (('nestedTest2', 'nested', 'test'), 'test', does_not_raise()),
+    ('get', 'test', does_not_raise()),
+    (None, None, pytest.raises(KeyError)),
+    ((), None, pytest.raises(KeyError)),
+    ([], None, pytest.raises(KeyError))
+])
 
-def test_get2(valid_config):
-    v = valid_config['test']
+def test_get_by_func(valid_config, keys, expected_result, expected_except):
+    with expected_except:
+        v = valid_config.get(keys)
 
-    assert v == 'test'
+        assert v == expected_result
 
-def test_nested_get(valid_config):
-    v = valid_config.get('nestedTest')
+### KEY tests
 
-    assert v == { 'test': 'test' }
+@pytest.mark.parametrize('keys, expected_result, expected_except', [
+    ('test', 'test', does_not_raise()),
+    ('nestedTest', { 'test': 'test' }, does_not_raise()),
+    (('nestedTest', 'test'), 'test', does_not_raise()),
+    (('nestedTest2', 'nested', 'test'), 'test', does_not_raise()),
+    ('get', 'test', does_not_raise()),
+    (None, None, pytest.raises(KeyError)),
+    ((), None, pytest.raises(KeyError)),
+    ([], None, pytest.raises(KeyError))
+])
 
-def test_nested_val_get(valid_config):
-    v = valid_config.get('nestedTest', 'test')
+def test_get_by_key(valid_config, keys, expected_result, expected_except):
+    with expected_except:
+        if type(keys) == str or type(keys) == type(None):
+            v = valid_config[keys]
+        elif type(keys) == tuple:
+            fk = ()
 
-    assert v == 'test'
+            if len(keys) > 0:
+                fk = keys[0]
 
-def test_dbl_nested_val_get(valid_config):
-    v = valid_config.get('nestedTest2', 'nested', 'test')
+            v = valid_config[fk]
 
-    assert v == 'test'
+            for k in keys[1:]:
+                v = v[k]
+        elif type(keys) == list:
+            fk = []
 
-def test_nested_get2(valid_config):
-    v = valid_config['nestedTest']
+            if len(keys) > 0:
+                fk = keys[0]
 
-    assert v == { 'test' : 'test'}
+            v = valid_config[fk]
 
-def test_nested_get3(valid_config):
-    v = valid_config['nestedTest']['test']
+            for k in keys[1:]:
+                v = v[k]
+        else:
+            assert 1 == 2
 
-    assert v == 'test'
+        assert v == expected_result
 
-def test_delete(valid_config):
-    valid_config.delete('test')
 
-    assert 'test' not in valid_config
+### ATTR tests
 
-def test_delete2(valid_config):
+@pytest.mark.parametrize('keys, expected_result, expected_except', [
+    ('test', 'test', does_not_raise()),
+    # ('nestedTest', { 'test': 'test' }, does_not_raise()),
+    # (('nestedTest', 'test'), 'test', does_not_raise()),
+    # (('nestedTest2', 'nested', 'test'), 'test', does_not_raise()),
+    ('get', 'test', does_not_raise()),
+    # (None, None, pytest.raises(KeyError)),
+    # ((), None, pytest.raises(KeyError)),
+    # ([], None, pytest.raises(KeyError))
+])
+
+def test_get_by_attr(valid_config, keys, expected_result, expected_except):
+    with expected_except:
+        v = getattr(valid_config, keys)
+
+        print(v)
+
+        assert v == expected_result
+
+
+
+
+
+## DELETE tests
+
+### FUNC tests
+
+@pytest.mark.parametrize('keys, expected_except', [
+    ('test', does_not_raise()),
+    (('nestedTest', 'test'), does_not_raise()),
+    (('nestedTest2', 'nested', 'test'), does_not_raise()),
+    ('badDelete', pytest.raises(KeyError)),
+    (None, pytest.raises(KeyError)),
+    ((), pytest.raises(KeyError)),
+    ([], pytest.raises(KeyError))
+])
+
+def test_delete_by_func(valid_config, keys, expected_except):
+    with expected_except:
+        if type(keys) == str or type(keys) == type(None):
+            valid_config.delete(keys)
+
+            assert keys not in valid_config
+        else:
+            valid_config.delete(keys)
+
+            no_last_keys = keys[:-1]
+
+            assert keys not in valid_config.get(no_last_keys)
+
+### KEY tests
+
+def test_key_delete(valid_config):
     del valid_config['test']
 
     assert 'test' not in valid_config
 
-def test_nested_delete(valid_config):
-    valid_config.delete('nestedTest', 'test')
-
-    assert 'test' not in valid_config['nestedTest']
-
-def test_nested_delete2(valid_config):
+def test_key_nested_delete(valid_config):
     del valid_config['nestedTest']['test']
 
     assert 'test' not in valid_config['nestedTest']
-
-def test_bad_delete(valid_config):
-    with pytest.raises(KeyError):
-        valid_config.delete('badDelete')
-
-def test_empty_str_delete(valid_config):
-    with pytest.raises(KeyError):
-        valid_config.delete('')
-
-def test_empty_call_delete(valid_config):
-    with pytest.raises(KeyError):
-        valid_config.delete()
