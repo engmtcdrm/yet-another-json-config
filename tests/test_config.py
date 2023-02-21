@@ -147,16 +147,9 @@ def test_get_by_key(valid_config, keys, expected_result, expected_except):
 
 def test_delete_by_func(valid_config, keys, expected_except):
     with expected_except:
-        if type(keys) == str or type(keys) == type(None):
-            valid_config.delete(keys)
+        valid_config.delete(keys)
 
-            assert keys not in valid_config
-        else:
-            valid_config.delete(keys)
-
-            no_last_keys = keys[:-1]
-
-            assert keys not in valid_config.get(no_last_keys)
+        assert keys not in valid_config
 
 ### KEY tests
 

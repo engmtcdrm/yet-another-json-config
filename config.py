@@ -3,6 +3,7 @@ Reading json files as a configuration file, supports nested json values
 """
 import json
 import os
+from typing import Union
 
 class Config():
     """
@@ -34,7 +35,7 @@ class Config():
         else:
             raise FileNotFoundError(f'Config File {self.__config_file_path} does not exist.')
 
-    def save(self, indent = 4):
+    def save(self, indent: int = 4):
         """
         Saves the configuration file.
         """
@@ -147,7 +148,41 @@ class Config():
         else:
             raise KeyError(f'Setting {last_key} does not exist and cannot be deleted.')
 
-        print(self._settings)
+    def exists(self, *keys: str) -> bool:
+        """
+        Returns a boolean if a setting exists in the config or not.
+        """
+
+        if keys == ():
+            raise KeyError('No key specified to exists.')
+
+        # convert based on being a tuple or not
+        if type(keys[0]) == tuple:
+            keys_list = list(*keys)
+        else:
+            keys_list = list(keys)
+
+        if len(keys_list) == 0:
+            raise KeyError('No key specified to exists.')
+
+        data = self._settings
+
+        last_key = keys_list[-1]
+
+        if last_key == []:
+            raise KeyError('No key specified to exists.')
+
+        # when assigning drill down to *second* last key
+        for k in keys_list[:-1]:
+            if k in data:
+                data = data[k]
+            else:
+                return False
+
+        if last_key in data:
+            return True
+        else:
+            return False
 
     def settings(self):
         """
@@ -161,23 +196,20 @@ class Config():
     def __repr__(self):
         return str(self._settings)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[str, tuple, list]):
         return self.get(item)
 
-    def __setitem__(self, item, value):
+    def __setitem__(self, item: Union[str, tuple, list], value):
         self.set(item, value=value)
 
-    def __delitem__(self, item):
+    def __delitem__(self, item: Union[str, tuple, list]):
         self.delete(item)
 
     def __len__(self):
         return len(self._settings)
 
-    def __contains__(self, item):
-        if item in self._settings:
-            return True
-        else:
-            return False
+    def __contains__(self, item: Union[str, tuple, list]):
+        return self.exists(item)
 
 class MissingConfigFileException(Exception):
     """
