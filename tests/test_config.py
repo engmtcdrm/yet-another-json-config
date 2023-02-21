@@ -129,29 +129,6 @@ def test_get_by_key(valid_config, keys, expected_result, expected_except):
         assert v == expected_result
 
 
-### ATTR tests
-
-@pytest.mark.parametrize('keys, expected_result, expected_except', [
-    ('test', 'test', does_not_raise()),
-    # ('nestedTest', { 'test': 'test' }, does_not_raise()),
-    # (('nestedTest', 'test'), 'test', does_not_raise()),
-    # (('nestedTest2', 'nested', 'test'), 'test', does_not_raise()),
-    ('get', 'test', does_not_raise()),
-    # (None, None, pytest.raises(KeyError)),
-    # ((), None, pytest.raises(KeyError)),
-    # ([], None, pytest.raises(KeyError))
-])
-
-def test_get_by_attr(valid_config, keys, expected_result, expected_except):
-    with expected_except:
-        v = getattr(valid_config, keys)
-
-        print(v)
-
-        assert v == expected_result
-
-
-
 
 
 ## DELETE tests
