@@ -1,6 +1,6 @@
 {
     "test": "test",
-    "userFileNm": "test_$user$",
+    "varUserTest": "test_$user$",
     "nestedTest": {
         "test": "test"
     },
