@@ -10,16 +10,16 @@ class Config():
     """
 
     def __init__(self, config_file_path: str):
-        self.__settings = {}
+        self._settings = {}
 
         if os.path.exists(config_file_path) and os.path.isfile(config_file_path):
             self.__config_file_path = config_file_path
 
-            self.__load()
+            self._load()
         else:
             raise FileNotFoundError(f'Config File {config_file_path} does not exist.')
 
-    def __load(self):
+    def _load(self):
         """
         Loads the configuration file.
         """
@@ -30,7 +30,7 @@ class Config():
 
                 settings = json.loads(f.read())
 
-            self.__settings = settings
+            self._settings = settings
         else:
             raise FileNotFoundError(f'Config File {self.__config_file_path} does not exist.')
 
@@ -41,7 +41,7 @@ class Config():
 
         if self.__config_file_path is not None and os.path.isfile(self.__config_file_path):
             with open(self.__config_file_path, "w", encoding='utf-8') as out_file:
-                json.dump(self.__settings, out_file, indent = indent)
+                json.dump(self._settings, out_file, indent = indent)
         else:
             raise MissingConfigFileException('Config File must be set to save file.')
 
@@ -62,7 +62,7 @@ class Config():
         if len(keys_list) == 0:
             raise KeyError('No key specified to get.')
 
-        data = self.__settings
+        data = self._settings
 
         last_key = keys_list[-1]
 
@@ -95,7 +95,7 @@ class Config():
         if len(keys_list) == 0:
             raise KeyError('No key specified to set.')
 
-        data = self.__settings
+        data = self._settings
 
         last_key = keys_list[-1]
 
@@ -128,7 +128,7 @@ class Config():
         if len(keys_list) == 0:
             raise KeyError('No key specified for delete.')
 
-        data = self.__settings
+        data = self._settings
 
         last_key = keys_list[-1]
 
@@ -147,19 +147,19 @@ class Config():
         else:
             raise KeyError(f'Setting {last_key} does not exist and cannot be deleted.')
 
-        print(self.__settings)
+        print(self._settings)
 
     def settings(self):
         """
         Returns the current configuration settings.
         """
-        return self.__settings
+        return self._settings
 
     def __str__(self):
-        return str(self.__settings)
+        return str(self._settings)
 
     def __repr__(self):
-        return str(self.__settings)
+        return str(self._settings)
 
     def __getitem__(self, item):
         return self.get(item)
@@ -171,10 +171,10 @@ class Config():
         self.delete(item)
 
     def __len__(self):
-        return len(self.__settings)
+        return len(self._settings)
 
     def __contains__(self, item):
-        if item in self.__settings:
+        if item in self._settings:
             return True
         else:
             return False
