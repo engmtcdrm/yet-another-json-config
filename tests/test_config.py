@@ -1,7 +1,8 @@
 import pytest
 from json import JSONDecodeError
 from contextlib import nullcontext as does_not_raise
-from config import Config, MissingConfigFileException
+from config import Config
+import os
 
 @pytest.fixture
 def valid_config():
@@ -9,22 +10,31 @@ def valid_config():
     return conf
 
 @pytest.fixture()
-def invalid_test_file():
-    return './tests/doesnotexist.json'
+def invalid_test_file(tmp_path):
+    return os.path.join(tmp_path, './tests/invalid_test_file?/:|.\\json')
+
+@pytest.fixture()
+def new_test_file(tmp_path):
+    return os.path.join(tmp_path, 'new_config_test.json')
 
 @pytest.fixture()
 def malformed_test_file():
     return './tests/malformed_test.json'
 
 
-## LOAD tests
+## Initialization tests
 
 def test_load(valid_config):
     assert valid_config != {}
 
-def test_invalid_load(invalid_test_file):
-    with pytest.raises(FileNotFoundError):
+def test_invalid_config_name(invalid_test_file):
+    with pytest.raises(OSError):
         Config(invalid_test_file)
+
+def test_new_config(new_test_file):
+    c = Config(new_test_file)
+
+    assert c.settings() == {}
 
 def test_malformed_load(malformed_test_file):
     with pytest.raises(JSONDecodeError):

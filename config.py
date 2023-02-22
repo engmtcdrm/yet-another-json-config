@@ -7,44 +7,51 @@ from typing import Union
 
 class Config():
     """
-    Configuration File class
+    Configuration File Class
     """
 
     def __init__(self, config_file_path: str):
-        self._settings = {}
+        # if file exists, attempt to load it
+        # otherwise assume new config file
+        if os.path.exists(config_file_path):
+            if os.path.isfile(config_file_path):
+                self._config_file_path = config_file_path
 
-        if os.path.exists(config_file_path) and os.path.isfile(config_file_path):
-            self.__config_file_path = config_file_path
-
-            self._load()
+                self._load()
+            else:
+                raise FileNotFoundError(f'Config File {config_file_path} is not a file.')
         else:
-            raise FileNotFoundError(f'Config File {config_file_path} does not exist.')
+            # check that the file path is valid by attempting to open it real quick
+            try:
+                with open(config_file_path, 'x') as tempfile: # OSError if file exists or is invalid
+                    pass
+            except FileNotFoundError:
+                pass
+
+            self._settings = {}
+            self._config_file_path = config_file_path
 
     def _load(self):
         """
         Loads the configuration file.
         """
 
-        if os.path.exists(self.__config_file_path):
+        if os.path.exists(self._config_file_path):
             # Open Config File, read the json information and close the file
-            with open(self.__config_file_path, 'r', encoding = 'utf-8') as f:
+            with open(self._config_file_path, 'r', encoding = 'utf-8') as f:
 
                 settings = json.loads(f.read())
 
             self._settings = settings
         else:
-            raise FileNotFoundError(f'Config File {self.__config_file_path} does not exist.')
+            raise FileNotFoundError(f'Config File {self._config_file_path} does not exist.')
 
     def save(self, indent: int = 4):
         """
         Saves the configuration file.
         """
-
-        if self.__config_file_path is not None and os.path.isfile(self.__config_file_path):
-            with open(self.__config_file_path, "w", encoding='utf-8') as out_file:
-                json.dump(self._settings, out_file, indent = indent)
-        else:
-            raise MissingConfigFileException('Config File must be set to save file.')
+        with open(self._config_file_path, "w", encoding='utf-8') as out_file:
+            json.dump(self._settings, out_file, indent = indent)
 
     def get(self, *keys: str):
         """
@@ -210,9 +217,3 @@ class Config():
 
     def __contains__(self, item: Union[str, tuple, list]):
         return self.exists(item)
-
-class MissingConfigFileException(Exception):
-    """
-    Raises an exception when Config file is missing
-    """
-    pass
