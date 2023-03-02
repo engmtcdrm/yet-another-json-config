@@ -1,7 +1,7 @@
 import pytest
 from json import JSONDecodeError
 from contextlib import nullcontext as does_not_raise
-from config import Config
+from src.json_config.json_config import Config
 import os
 
 @pytest.fixture
