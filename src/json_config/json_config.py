@@ -1,16 +1,19 @@
 """
-Reading json files as a configuration file, supports nested json values
+Reads and write json files as a configuration file, supports nested json values.
 """
 import json
 import os
 from typing import Union
 
 class Config():
-    """
-    Configuration File Class
-    """
-
     def __init__(self, config_file_path: str):
+        """
+        Create an instance of a configuration file.
+
+        Args:
+        config_file_path (str): The path to the configuration file.
+        """
+
         # if file exists, attempt to load it
         # otherwise assume new config file
         if os.path.exists(config_file_path):
@@ -58,144 +61,106 @@ class Config():
         Returns the specified setting.
         """
 
-        if keys == ():
-            raise KeyError('No key specified to get.')
-
-        # convert based on being a tuple or not
-        if type(keys[0]) == tuple:
-            keys_list = list(*keys)
-        else:
-            keys_list = list(keys)
-
-        if len(keys_list) == 0:
-            raise KeyError('No key specified to get.')
-
-        data = self._settings
-
-        last_key = keys_list[-1]
-
-        if last_key == []:
-            raise KeyError('No key specified to get.')
-
-        # when assigning drill down to *second* last key
-        for k in keys_list[:-1]:
-            if k in data:
-                data = data[k]
-            else:
-                raise KeyError(f'Setting {k} does not exist.')
-
-        return data[last_key]
+        return self._action(keys, action='get')
 
     def set(self, *keys: str, value):
         """
         Sets the specified setting.
         """
 
-        if keys == ():
-            raise KeyError('No key specified to set.')
-
-        # convert based on being a tuple or not
-        if type(keys[0]) == tuple:
-            keys_list = list(*keys)
-        else:
-            keys_list = list(keys)
-
-        if len(keys_list) == 0:
-            raise KeyError('No key specified to set.')
-
-        data = self._settings
-
-        last_key = keys_list[-1]
-
-        if last_key == []:
-            raise KeyError('No key specified to set.')
-
-        # when assigning drill down to *second* last key
-        for k in keys_list[:-1]:
-            if k in data:
-                data = data[k]
-            else:
-                raise KeyError(f'Setting {k} does not exist.')
-
-        data[last_key] = value
+        self._action(keys, action='set', value=value)
 
     def delete(self, *keys: str):
         """
-        Deletes the specified setting from the configuration if it exists.
+        Deletes the specified setting.
         """
 
-        if keys == ():
-            raise KeyError('No key specified for delete.')
-
-        # convert based on being a tuple or not
-        if type(keys[0]) == tuple:
-            keys_list = list(*keys)
-        else:
-            keys_list = list(keys)
-
-        if len(keys_list) == 0:
-            raise KeyError('No key specified for delete.')
-
-        data = self._settings
-
-        last_key = keys_list[-1]
-
-        if last_key == []:
-            raise KeyError('No key specified for delete.')
-
-        # when assigning drill down to *second* last key
-        for k in keys_list[:-1]:
-            if k in data:
-                data = data[k]
-            else:
-                raise KeyError(f'Setting {k} does not exist.')
-
-        if last_key in data:
-            del data[last_key]
-        else:
-            raise KeyError(f'Setting {last_key} does not exist and cannot be deleted.')
+        self._action(keys, action='delete')
 
     def exists(self, *keys: str) -> bool:
         """
-        Returns a boolean if a setting exists in the config or not.
+        Returns a boolean if a setting exists.
         """
 
-        if keys == ():
-            raise KeyError('No key specified to exists.')
+        return self._action(keys, action='exists')
 
-        # convert based on being a tuple or not
+    def settings(self):
+        """
+        Returns the current settings.
+        """
+
+        return self._settings
+
+    def _action(self, keys, action: str, value = None):
+        """
+        Perform an action on a setting.
+
+        Args:
+        keys (Tuple[Union[str, Tuple[str, ...]]]): A list of keys that specify the path to the
+            value to be accessed or modified in the dictionary. Each key in the list is either
+            a string or a tuple of strings. If a tuple is used, it represents a sub-path within
+            the dictionary.
+        action (str): A string that specifies the action to be performed on the dictionary.
+            Valid actions are 'get', 'set', 'delete', and 'exists'.
+        value (Any, optional): The value to be used in conjunction with the 'set' action.
+            This argument is ignored for all other actions. If the 'set' action is specified and
+            `value` is not provided, a TypeError is raised.
+        """
+
+        if action not in ['get', 'set', 'exists', 'delete']:
+            raise ValueError(f"{action} was not a valid action. Only 'get', 'set', 'exists', and 'delete' can be used.")
+
+        action_text = action
+
+        # Pull off plural, only for exists action for now
+        if action[-1] == 's':
+            action_text = action[:-1]
+
+        if keys == ():
+            raise KeyError(f'No key specified to {action_text}.')
+
+        # Convert based on being a tuple or not
         if type(keys[0]) == tuple:
+            print(keys)
             keys_list = list(*keys)
         else:
             keys_list = list(keys)
 
         if len(keys_list) == 0:
-            raise KeyError('No key specified to exists.')
+            raise KeyError(f'No key specified to {action_text}.')
 
         data = self._settings
 
         last_key = keys_list[-1]
 
         if last_key == []:
-            raise KeyError('No key specified to exists.')
+            raise KeyError(f'No key specified to {action_text}.')
 
-        # when assigning drill down to *second* last key
+        # When assigning drill down to *second* last key
         for k in keys_list[:-1]:
             if k in data:
                 data = data[k]
             else:
+                if action != 'exists':
+                    raise KeyError(f'Setting {k} does not exist.')
+                else:
+                    return False
+
+        # based on action, respond differently to the setting
+        if action == 'get':
+            return data[last_key]
+        elif action == 'set':
+            data[last_key] = value
+        elif action == 'exists':
+            if last_key in data:
+                return True
+            else:
                 return False
-
-        if last_key in data:
-            return True
-        else:
-            return False
-
-    def settings(self):
-        """
-        Returns the current configuration settings.
-        """
-        return self._settings
+        elif action == 'delete':
+            if last_key in data:
+                del data[last_key]
+            else:
+                raise KeyError(f'Setting {last_key} does not exist and cannot be deleted.')
 
     def __str__(self):
         return str(self._settings)
@@ -212,8 +177,8 @@ class Config():
     def __delitem__(self, item: Union[str, tuple, list]):
         self.delete(item)
 
-    def __len__(self):
-        return len(self._settings)
-
     def __contains__(self, item: Union[str, tuple, list]):
         return self.exists(item)
+
+    def __len__(self):
+        return len(self._settings)
