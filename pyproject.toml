@@ -3,12 +3,12 @@ requires = ['setuptools>=42']
 build-backend = 'setuptools.build_meta'
 
 [project]
-name = "json-config-engmtcdrm"
+name = "yet-another-json-config"
 version = "0.0.1"
 authors = [
-  { name="engmtcdrm", email="" },
+  { name="engmtcdrm", email="gabif54409@rolenot.com" },
 ]
-description = "Reading json files as a configuration file, supports nested json values"
+description = "Reads and write json files as a configuration file, supports nested json values."
 readme = "README.md"
 requires-python = ">=3.6"
 classifiers = [
@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/engmtcdrm/json-config"
-"Bug Tracker" = "https://github.com/engmtcdrm/json-config/issues"
+"Homepage" = "https://github.com/engmtcdrm/yet-another-json-config"
+"Bug Tracker" = "https://github.com/engmtcdrm/yet-another-json-config/issues"
