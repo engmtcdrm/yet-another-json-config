@@ -106,3 +106,33 @@ del c['test']
 # deleting a nested setting
 del c['nestedTest2']['nested']['test']
 ```
+
+## Custom Config Class
+Below is an example of a custom config class that is derived off the `Config` class. In this example it allows for the variable `$user$` to be replaced at run time with the user id that is currently running the code. This could be expanded further as well as potential validation of the configuration file after loading via the `validate` method.
+
+```py
+import getpass
+from yet_another_json_config import Config
+
+class CustomConfig(Config):
+    def _load(self):
+        super()._load()
+
+        user = getpass.getuser()
+
+        if 'varUserTest' in self._settings:
+            # replace special character in filename with the username
+            self.set('varUserTest', value=self.get('varUserTest').replace('$user$', user))
+
+        print(self._settings)
+
+        self.validate()
+
+    def validate(self):
+        pass
+
+
+conf = CustomConfig('./tests/test.json')
+
+print(conf.settings())
+```

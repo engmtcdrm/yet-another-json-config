@@ -1,7 +1,11 @@
 # Build and Distribute
 ```sh
 python -m build
+
+# test pypi site
 python -m twine upload --repository testpypi dist/*
+
+python -m twine upload --repository pypi dist/*
 ```
 
 
@@ -11,6 +15,7 @@ python -m venv env
 
 .\env\Scripts\activate
 
+# test pypi site
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps yet-another-json-config
 
 python test.py
