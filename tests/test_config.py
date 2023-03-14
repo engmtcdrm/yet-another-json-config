@@ -36,6 +36,10 @@ def test_new_config(new_test_file):
 
     assert c.settings() == {}
 
+def test_file_must_exist_config(new_test_file):
+    with pytest.raises(FileNotFoundError):
+        Config(new_test_file, True)
+
 def test_malformed_load(malformed_test_file):
     with pytest.raises(JSONDecodeError):
         Config(malformed_test_file)
