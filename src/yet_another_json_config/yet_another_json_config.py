@@ -6,12 +6,13 @@ import os
 from typing import Union
 
 class Config():
-    def __init__(self, config_file_path: str):
+    def __init__(self, config_file_path: str, file_must_exist: bool = False):
         """
         Create an instance of a configuration file.
 
         Args:
         config_file_path (str): The path to the configuration file.
+        file_must_exist (bool, Optional): Raises a FileNotFoundError exception if file does not exist. Default value is 'False'.
         """
 
         # if file exists, attempt to load it
@@ -23,16 +24,18 @@ class Config():
                 self._load()
             else:
                 raise FileNotFoundError(f'Config File {config_file_path} is not a file.')
-        else:
+        elif file_must_exist == False:
             # check that the file path is valid by attempting to open it real quick
             try:
                 with open(config_file_path, 'x') as tempfile: # OSError if file exists or is invalid
                     pass
-            except FileNotFoundError:
+            except FileNotFoundError as e:
                 pass
 
             self._settings = {}
             self._config_file_path = config_file_path
+        else:
+            raise FileNotFoundError(f'Config File {config_file_path} does not exist.')
 
     def _load(self):
         """
