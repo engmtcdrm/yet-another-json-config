@@ -3,7 +3,7 @@ Python class to reads and write json files as a configuration file, supports nes
 
 # Examples
 
-## Initializing Config
+## Initializing `Config` Class
 ```py
 from yet_another_json_config import Config
 
@@ -136,3 +136,37 @@ conf = CustomConfig('./tests/test.json')
 
 print(conf.settings())
 ```
+
+# API Reference
+> ```py
+> class Config(config_file_path, file_must_exist=False)
+> ```
+
+Create an instance of a configuration file.
+
+## Arguments
+
+- **`config_file_path`** (`str`) - The path to the configuration file.
+- **`file_must_exist`** (`bool, Optional`) - Raises a `FileNotFoundError` exception if file does not exist. Default value is `False`.
+
+> ```py
+> get(*keys: str)
+> ```
+
+Returns the value of the keys specified.
+
+- **`*keys`** - (`str`) - List of `str` or Tuple of `str` traversing the settings and return a value if the setting exists. If the setting does not exist, a `KeyError` exception is raised.
+
+> ```py
+> set(*keys: str, value)
+> ```
+
+Sets the keys to the value specified.
+
+- **`*keys`** - (`str`) - List of `str` or Tuple of `str` traversing the settings to set the specified key to the specified value. If the setting does not exist, the setting is created.
+
+> ```py
+> settings()
+> ```
+
+Returns all settings in the configuration.
