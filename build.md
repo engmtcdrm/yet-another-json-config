@@ -18,5 +18,7 @@ python -m venv env
 # test pypi site
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps yet-another-json-config
 
-python test.py
+python -m pip install pytest
+
+python -m pytest
 ```
