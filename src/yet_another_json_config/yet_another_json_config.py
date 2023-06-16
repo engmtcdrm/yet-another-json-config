@@ -124,7 +124,6 @@ class Config():
 
         # Convert based on being a tuple or not
         if type(keys[0]) == tuple:
-            print(keys)
             keys_list = list(*keys)
         else:
             keys_list = list(keys)
