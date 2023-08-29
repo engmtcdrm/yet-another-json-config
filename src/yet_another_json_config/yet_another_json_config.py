@@ -1,20 +1,20 @@
-"""
-Reads and write json files as a configuration file, supports nested json values.
-"""
+"""Reads and write json files as a configuration file, supports nested json values."""
 import json
 import os
-from typing import Union
+from typing import Union, Optional
 
 class Config():
-    def __init__(self, config_file_path: str, file_must_exist: bool = False):
-        """
-        Create an instance of a configuration file.
+    """
+    Create an instance of a configuration file.
 
-        Args:
-        config_file_path (str): The path to the configuration file.
-        file_must_exist (bool, Optional): Raises a FileNotFoundError exception if file does not exist. Default value is 'False'.
-        """
-
+    :params config_file_path: The path to the configuration file.
+    :params file_must_exist: (optional) Raises a FileNotFoundError exception if file does not exist. (default: ``False``)
+    """
+    def __init__(
+        self,
+        config_file_path: str,
+        file_must_exist: Optional[bool] = False
+    ):
         # if file exists, attempt to load it
         # otherwise assume new config file
         if os.path.exists(config_file_path):
@@ -38,9 +38,7 @@ class Config():
             raise FileNotFoundError(f'Config File {config_file_path} does not exist.')
 
     def _load(self):
-        """
-        Loads the configuration file.
-        """
+        """Loads the configuration file."""
 
         if os.path.exists(self._config_file_path):
             # Open Config File, read the json information and close the file
@@ -52,45 +50,71 @@ class Config():
         else:
             raise FileNotFoundError(f'Config File {self._config_file_path} does not exist.')
 
-    def save(self, indent: int = 4):
+    def save(
+        self,
+        indent: Optional[int] = 4
+    ):
         """
         Saves the configuration file.
+
+        :params indent: (optional) The number of spaces to indent the json file. (default: ``4``)
         """
+
         with open(self._config_file_path, "w", encoding='utf-8') as out_file:
             json.dump(self._settings, out_file, indent = indent)
 
-    def get(self, *keys: str):
+    def get(
+        self,
+        *keys: str
+    ):
         """
         Returns the specified setting.
+
+        :params keys: The path to the setting.
         """
 
         return self._action(keys, action='get')
 
-    def set(self, *keys: str, value):
+    def set(
+        self,
+        *keys: str,
+        value
+    ) -> None:
         """
         Sets the specified setting.
+
+        :params keys: The path to the setting.
+        :params value: The value to be set.
         """
 
         self._action(keys, action='set', value=value)
 
-    def delete(self, *keys: str):
+    def delete(
+        self,
+        *keys: str
+    ) -> None:
         """
         Deletes the specified setting.
+
+        :params keys: The path to the setting.
         """
 
         self._action(keys, action='delete')
 
-    def exists(self, *keys: str) -> bool:
+    def exists(
+        self,
+        *keys: str
+    ) -> bool:
         """
         Returns a boolean if a setting exists.
+
+        :params keys: The path to the setting.
         """
 
         return self._action(keys, action='exists')
 
-    def settings(self):
-        """
-        Returns the current settings.
-        """
+    def settings(self) -> dict:
+        """Returns the current settings."""
 
         return self._settings
 
@@ -98,16 +122,15 @@ class Config():
         """
         Perform an action on a setting.
 
-        Args:
-        keys (Tuple[Union[str, Tuple[str, ...]]]): A list of keys that specify the path to the
+        :params keys (Tuple[Union[str, Tuple[str, ...]]]): A list of keys that specify the path to the
             value to be accessed or modified in the dictionary. Each key in the list is either
             a string or a tuple of strings. If a tuple is used, it represents a sub-path within
             the dictionary.
-        action (str): A string that specifies the action to be performed on the dictionary.
-            Valid actions are 'get', 'set', 'delete', and 'exists'.
-        value (Any, optional): The value to be used in conjunction with the 'set' action.
-            This argument is ignored for all other actions. If the 'set' action is specified and
-            `value` is not provided, a TypeError is raised.
+        :params action (str): A string that specifies the action to be performed on the dictionary.
+            Valid actions are ``get``, ``set``, ``delete``, and ``exists``.
+        :params value: (optional) The value to be used in conjunction with the ``set`` action.
+            This argument is ignored for all other actions. If the ``set`` action is specified and
+            ``value`` is not provided, a TypeError is raised. (default: ``None``)
         """
 
         if action not in ['get', 'set', 'exists', 'delete']:
@@ -164,23 +187,36 @@ class Config():
             else:
                 raise KeyError(f'Setting {last_key} does not exist and cannot be deleted.')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._settings)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self._settings)
 
-    def __getitem__(self, item: Union[str, tuple, list]):
+    def __getitem__(
+        self,
+        item: Union[str, tuple, list]
+    ) -> str:
         return self.get(item)
 
-    def __setitem__(self, item: Union[str, tuple, list], value):
-        self.set(item, value=value)
+    def __setitem__(
+        self,
+        item: Union[str, tuple, list],
+        value
+    ) -> None:
+        self.set(item, value = value)
 
-    def __delitem__(self, item: Union[str, tuple, list]):
+    def __delitem__(
+        self,
+        item: Union[str, tuple, list]
+    ) -> None:
         self.delete(item)
 
-    def __contains__(self, item: Union[str, tuple, list]):
+    def __contains__(
+        self,
+        item: Union[str, tuple, list]
+    ) -> bool:
         return self.exists(item)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._settings)
