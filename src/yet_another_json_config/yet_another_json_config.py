@@ -118,15 +118,20 @@ class Config():
 
         return self._settings
 
-    def _action(self, keys, action: str, value = None):
+    def _action(
+        self,
+        keys: Union[str, tuple, list],
+        action: str,
+        value = None
+    ):
         """
         Perform an action on a setting.
 
-        :params keys (Tuple[Union[str, Tuple[str, ...]]]): A list of keys that specify the path to the
+        :params keys: A list of keys that specify the path to the
             value to be accessed or modified in the dictionary. Each key in the list is either
             a string or a tuple of strings. If a tuple is used, it represents a sub-path within
             the dictionary.
-        :params action (str): A string that specifies the action to be performed on the dictionary.
+        :params action: A string that specifies the action to be performed on the dictionary.
             Valid actions are ``get``, ``set``, ``delete``, and ``exists``.
         :params value: (optional) The value to be used in conjunction with the ``set`` action.
             This argument is ignored for all other actions. If the ``set`` action is specified and
