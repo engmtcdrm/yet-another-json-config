@@ -24,12 +24,13 @@ class Config():
                 self._load()
             else:
                 raise FileNotFoundError(f'Config File {config_file_path} is not a file.')
-        elif file_must_exist == False:
+        elif file_must_exist is False:
             # check that the file path is valid by attempting to open it real quick
             try:
-                with open(config_file_path, 'x') as tempfile: # OSError if file exists or is invalid
+                # OSError if file exists or is invalid
+                with open(config_file_path, 'x', encoding = 'utf-8'):
                     pass
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 pass
 
             self._settings = {}
@@ -49,6 +50,23 @@ class Config():
             self._settings = settings
         else:
             raise FileNotFoundError(f'Config File {self._config_file_path} does not exist.')
+
+    def _convert_keys_to_list(
+        self,
+        keys: Union[str, tuple, list]
+    ) -> list[str]:
+        """
+        Convert the keys to a list.
+
+        :params keys: The keys to be converted.
+        :return: The converted keys as a list.
+        """
+        if isinstance(keys[0], tuple):
+            keys_list = list(*keys)
+        else:
+            keys_list = list(keys)
+
+        return keys_list
 
     def save(
         self,
@@ -150,11 +168,7 @@ class Config():
         if keys == ():
             raise KeyError(f'No key specified to {action_text}.')
 
-        # Convert based on being a tuple or not
-        if type(keys[0]) == tuple:
-            keys_list = list(*keys)
-        else:
-            keys_list = list(keys)
+        keys_list = self._convert_keys_to_list(keys)
 
         if len(keys_list) == 0:
             raise KeyError(f'No key specified to {action_text}.')
