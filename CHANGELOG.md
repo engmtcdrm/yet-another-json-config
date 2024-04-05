@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored structure of method definitions to align with more recent coding practices
 - Refactored the logic for converting tuples and non-tuples to its own method called `_convert_keys_to_list`. this can be useful for inherited classes that may want to use this function. (#9)
 
+### Fixed
+
+- Fixed an empty config file being created on the file system when `file_must_exist = False` is used when instantiating the `Config` class. (#8)
+
 ## [v0.0.4] - 2023-06-15
 
 ### Fixed

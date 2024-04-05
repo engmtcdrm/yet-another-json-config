@@ -27,9 +27,17 @@ class Config():
         elif file_must_exist is False:
             # check that the file path is valid by attempting to open it real quick
             try:
-                # OSError if file exists or is invalid
+                # FileExistsError if file exists or is invalid
                 with open(config_file_path, 'x', encoding = 'utf-8'):
                     pass
+
+                # Delete the file if it is empty
+                if os.path.isfile(config_file_path):
+                    with open(config_file_path, 'r', encoding = 'utf-8') as f:
+                        contents = f.read()
+
+                    if contents == '':
+                        os.remove(config_file_path)
             except FileNotFoundError:
                 pass
 
