@@ -1,8 +1,10 @@
-import pytest
-from json import JSONDecodeError
 from contextlib import nullcontext as does_not_raise
-from src.yet_another_json_config.yet_another_json_config import Config
+from json import JSONDecodeError
 import os
+
+import pytest
+from src.yet_another_json_config.yet_another_json_config import Config
+
 
 @pytest.fixture
 def valid_config():
@@ -34,6 +36,7 @@ def test_invalid_config_name(invalid_test_file):
 def test_new_config(new_test_file):
     c = Config(new_test_file)
 
+    assert os.path.isfile(new_test_file) == False
     assert c.settings() == {}
 
 def test_file_must_exist_config(new_test_file):
