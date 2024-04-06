@@ -2,6 +2,9 @@
 ```sh
 python -m build
 
+# have Twine test the distribution
+twine check dist/*
+
 # test pypi site
 python -m twine upload --repository testpypi dist/*
 
