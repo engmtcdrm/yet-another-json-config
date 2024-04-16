@@ -1,7 +1,7 @@
 """Reads and write json files as a configuration file, supports nested json values."""
 import json
 import os
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 class Config():
     """
@@ -62,7 +62,7 @@ class Config():
     def _convert_keys_to_list(
         self,
         keys: Union[str, tuple, list]
-    ) -> list[str]:
+    ) -> List[str]:
         """
         Convert the keys to a list.
 

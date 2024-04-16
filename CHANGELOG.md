@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed crash in Python 3.8 (#12)
+
 ## [v1.0.0] - 2024-04-06
 
 ### Added
